@@ -12,7 +12,7 @@ export const AccessTokenGuard = async (req: Request, res: Response, next: NextFu
         const payload = await jwtService.verifyToken(token);
         if(payload) {
             const {userId} = payload;
-            res.locals.userId = userId;
+            req.userId = userId;
             next();
             return;
         }
@@ -21,5 +21,4 @@ export const AccessTokenGuard = async (req: Request, res: Response, next: NextFu
     } catch(err: unknown){
         errorHandler(err,res);
     }
-
 }

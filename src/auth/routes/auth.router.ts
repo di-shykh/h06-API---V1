@@ -3,6 +3,7 @@ import {loginOrEmailValidation, passwordValidation} from "../../users/routes/use
 import {inputValidationResultMiddleware} from "../../core/middlewares/validation/input-validation.result.middleware";
 import {authHandler} from "./auth.handler";
 import {AccessTokenGuard} from "../middlewares/access.token.guard";
+import {authGetHandler} from "./auth.get-user.handler";
 
 export const authRouter: Router = Router({});
 
@@ -17,5 +18,5 @@ authRouter
     .get(
         "/me",
         AccessTokenGuard,
-
+        authGetHandler
     )
