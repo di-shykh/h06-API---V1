@@ -1,0 +1,7 @@
+export type CommentDB = {
+    // id: string;
+    content: string;
+    userId: string;
+    postId: string;
+    createdAt: string;
+}

@@ -1,0 +1,27 @@
+import {CommentInputDto} from "../../application/dtos/comment.input-dto";
+import {Request, Response} from 'express';
+import {errorHandler} from "../../../core/errors/error.handler";
+import {commentsService} from "../../application/comment.services";
+import {CommentOutput} from "../output/comment-output";
+import {Result} from "../../../core/result/resul.type";
+import {ResultStatus} from "../../../core/result/result.code";
+import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
+import {HttpStatus} from "../../../core/types/http-statuses";
+
+export async function createCommentHandler(
+    req: Request<{postId: string},{},CommentInputDto>,
+    res: Response): Promise<void> {
+    try{
+        const postId: string = req.params.postId;
+        const commentInput: CommentInputDto = req.body;
+        const userId: string = req.userId as string;
+        const result: Result<CommentOutput|null> = await commentsService.createComment(postId, userId, commentInput);
+        if(result.status!== ResultStatus.Created){
+            return res.status(resultCodeToHttpException(result.status)).send(result.extensions);
+        }
+        return res.status(HttpStatus.Created).send(result.data);
+    } catch (e) {
+        errorHandler(e,res);
+    }
+
+}
