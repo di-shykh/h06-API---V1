@@ -5,7 +5,7 @@ import {Result, ResultObject} from "../../core/result/resul.type";
 import {CommentDB} from "../routes/output/commnent.db";
 import {commentsRepository} from "../repositories/comments.repository";
 import {commentsQueryRepository} from "../repositories/comments.query-repository";
-import {WithId} from "mongodb";
+import {DeleteResult, WithId} from "mongodb";
 import {CommentOutput} from "../routes/output/comment-output";
 
 export const commentsService = {
@@ -28,5 +28,18 @@ export const commentsService = {
     async updateComment(commentId: string, dto: CommentInputDto): Promise<Result> {
 
     },
-    async deleteComment(postId: string, userId: string, dto: CommentInputDto): Promise<Result> {}
+    async deleteComment(userId: string, commentId: string): Promise<Result> {
+        const comment = await commentsQueryRepository.findCommentById(commentId);
+        if (!comment) {
+           return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
+        }
+        if (comment.userId !== userId) {
+            return ResultObject.Forbidden();
+        }
+        const result: DeleteResult = await commentsRepository.deleteComment(commentId);
+        if(result.deletedCount<1) {
+            return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
+        }
+        return ResultObject.NoContent();
+    }
 }

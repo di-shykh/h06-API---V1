@@ -1,5 +1,4 @@
 import {ResultStatus} from "./result.code";
-import {asyncWrapProviders} from "node:async_hooks";
 
 type ExtensionType = {
     field: string| null;
@@ -29,7 +28,7 @@ export class ResultObject {
             extensions: [],
         };
     }
-    static NoContent(): Result<void> {
+    static NoContent(): Result<null> {
         return {
             status: ResultStatus.NoContent,
             data: null,
@@ -52,5 +51,13 @@ export class ResultObject {
             errorMessage: 'Bad Request',
             extensions: [{ field, message }],
         };
+    }
+    static Forbidden(): Result<null> {
+        return {
+            status: ResultStatus.Forbidden,
+            data: null,
+            errorMessage: 'Forbidden',
+            extensions: [],
+        }
     }
 }
