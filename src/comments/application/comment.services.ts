@@ -5,7 +5,7 @@ import {Result, ResultObject} from "../../core/result/resul.type";
 import {CommentDB} from "../routes/output/commnent.db";
 import {commentsRepository} from "../repositories/comments.repository";
 import {commentsQueryRepository} from "../repositories/comments.query-repository";
-import {DeleteResult, WithId} from "mongodb";
+import {DeleteResult, UpdateResult, WithId} from "mongodb";
 import {CommentOutput} from "../routes/output/comment-output";
 
 export const commentsService = {
@@ -25,21 +25,36 @@ export const commentsService = {
         const createdCommentOutput: CommentOutput = await commentsQueryRepository.mapToCommentOutput(createdComment);
         return ResultObject.Created(createdCommentOutput);
     },
-    async updateComment(commentId: string, dto: CommentInputDto): Promise<Result> {
-
+    async updateComment(commentId: string, userId: string, dto: CommentInputDto): Promise<Result> {
+        const checkResult = await this.checkUserId(userId, commentId);
+        if(checkResult.status === ResultStatus.Forbidden||checkResult.status === ResultStatus.NotFound) {
+            return checkResult;
+        }
+        const result: UpdateResult = await commentsRepository.updateComment(commentId, dto);
+        if(result.matchedCount <1) {
+            return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
+        }
+        return ResultObject.NoContent();
     },
     async deleteComment(userId: string, commentId: string): Promise<Result> {
-        const comment = await commentsQueryRepository.findCommentById(commentId);
-        if (!comment) {
-           return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
-        }
-        if (comment.userId !== userId) {
-            return ResultObject.Forbidden();
-        }
+       const checkResult = await this.checkUserId(userId, commentId);
+       if(checkResult.status === ResultStatus.Forbidden||checkResult.status === ResultStatus.NotFound) {
+           return checkResult;
+       }
         const result: DeleteResult = await commentsRepository.deleteComment(commentId);
         if(result.deletedCount<1) {
             return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
         }
         return ResultObject.NoContent();
+    },
+    async checkUserId(userId: string, commentId: string): Promise<Result> {
+        const comment = await commentsQueryRepository.findCommentById(commentId);
+        if (!comment) {
+            return ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
+        }
+        if (comment.userId !== userId) {
+            return ResultObject.Forbidden();
+        }
+        return ResultObject.Success(null);
     }
 }

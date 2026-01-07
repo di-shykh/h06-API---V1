@@ -14,7 +14,7 @@ import {superAdminMiddleware} from "../../auth/middlewares/super-admin.guard-mid
 import {paginationAndSortingValidation} from "../../core/middlewares/validation/query-pagination-sorting.validation";
 import {PostSortField} from "./input/post-sort-field";
 import {AccessTokenGuard} from "../../auth/middlewares/access.token.guard";
-import {commentCreateValidation} from "../../comments/routes/comment.input-dto.validation-middleware";
+import { commentInputValidation} from "../../comments/routes/comment.input-dto.validation-middleware";
 import {createCommentHandler} from "../../comments/routes/handlers/create-comment.handler";
 
 export const postsRouter: Router = Router({});
@@ -52,6 +52,6 @@ postsRouter
     .post(
         "/:id/comments",
         AccessTokenGuard,
-        commentCreateValidation,
+        commentInputValidation,
         createCommentHandler
     )
