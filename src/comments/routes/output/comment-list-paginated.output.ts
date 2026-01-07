@@ -1,6 +1,6 @@
 import {CommentOutput} from "./comment-output";
 
-export type PostListPaginatedOutput = {
+export type CommentListPaginatedOutput = {
     page: number;
     pageSize: number;
     pagesCount: number;
