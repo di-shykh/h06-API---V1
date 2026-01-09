@@ -10,7 +10,7 @@ export async function getCommentHandler(req: Request, res: Response): Promise<vo
         const id = req.params.id as string;
         const comment = await commentsQueryRepository.findCommentById(id);
         if (!comment) {
-            const result = ResultObject.NotFound('commentId', 'Post with this Id is not exist');
+            const result = ResultObject.NotFound('commentId', 'Comment with this Id is not exist');
             res.status(resultCodeToHttpException(result.status)).json({
                 errorsMesages: result.extensions
             });

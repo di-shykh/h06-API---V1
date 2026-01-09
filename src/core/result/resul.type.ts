@@ -60,4 +60,12 @@ export class ResultObject {
             extensions: [],
         }
     }
+    static InternalServerError( message?: string): Result<null> {
+        return {
+            status: ResultStatus.InternalServerError,
+            data: null,
+            errorMessage: message || 'Internal Server Error',
+            extensions: [],
+        }
+    }
 }

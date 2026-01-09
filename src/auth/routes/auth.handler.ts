@@ -6,9 +6,9 @@ import {authService} from "../application/auth.service";
 export async function authHandler(req: Request <{}, {}, LoginInputDto>, res: Response) {
 
     const {loginOrEmail, password} = req.body;
-    const accessToken = await authService.loginUser(loginOrEmail, password);
-    if(!accessToken) {
+    const tokenResult = await authService.loginUser(loginOrEmail, password);
+    if(!tokenResult) {
         return res.sendStatus(HttpStatus.Unauthorized);
     }
-    return res.status(HttpStatus.NoContent).send({accessToken});
+    return res.status(HttpStatus.Ok).send(tokenResult);
 }

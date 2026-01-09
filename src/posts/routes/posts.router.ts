@@ -52,6 +52,8 @@ postsRouter
     .post(
         "/:id/comments",
         AccessTokenGuard,
+        idValidator,
         commentInputValidation,
+        inputValidationResultMiddleware,
         createCommentHandler
     )

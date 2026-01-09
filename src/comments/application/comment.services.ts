@@ -7,10 +7,24 @@ import {commentsRepository} from "../repositories/comments.repository";
 import {commentsQueryRepository} from "../repositories/comments.query-repository";
 import {DeleteResult, UpdateResult, WithId} from "mongodb";
 import {CommentOutput} from "../routes/output/comment-output";
+import {Post} from "../../posts/domain/post";
+import {RepositoryNotFoundError} from "../../core/errors/repository-not-found.error";
 
 export const commentsService = {
     async createComment(postId: string, userId: string, dto: CommentInputDto): Promise<Result<CommentOutput|null>> {
-        const post = await postsQueryRepository.findPostByIdOrFail(postId);
+        let post: WithId<Post> | null;
+        try{
+            post = await postsQueryRepository.findPostByIdOrFail(postId);
+        } catch (error) {
+            // Если выброшено RepositoryNotFoundError - пост не найден
+            if (error instanceof RepositoryNotFoundError) {
+                return ResultObject.NotFound('postId', 'Post with this Id is not exist');
+            }
+            // Другие ошибки
+            console.error('Error finding post:', error);
+            return ResultObject.InternalServerError( 'Error finding post');
+        }
+        
         if (!post) {
             return ResultObject.NotFound('postId', 'Post with this Id is not exist');
         }
