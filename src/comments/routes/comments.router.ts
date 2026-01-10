@@ -5,6 +5,7 @@ import {AccessTokenGuard} from "../../auth/middlewares/access.token.guard";
 import {deleteCommentHandler} from "./handlers/delete-comment.handler";
 import {updateCommentHandler} from "./handlers/update-comment.handler";
 import {commentInputValidation} from "./comment.input-dto.validation-middleware";
+import {inputValidationResultMiddleware} from "../../core/middlewares/validation/input-validation.result.middleware";
 
 export const commentsRouter: Router = Router({});
 commentsRouter
@@ -24,5 +25,6 @@ commentsRouter
         AccessTokenGuard,
         idValidator,
         commentInputValidation,
+        inputValidationResultMiddleware,
         updateCommentHandler
     )

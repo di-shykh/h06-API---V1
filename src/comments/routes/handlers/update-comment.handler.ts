@@ -10,7 +10,7 @@ export async function updateCommentHandler(req: Request, res: Response) {
     try {
         const commentId: string = req.params.id as string;
         const userId: string = req.userId as string;
-        const content: CommentInputDto = req.body.content;
+        const content: CommentInputDto = req.body;
 
         const result = await commentsService.updateComment(commentId, userId, content)
         if (result.status === ResultStatus.Forbidden) {
