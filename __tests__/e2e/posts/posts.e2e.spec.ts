@@ -138,7 +138,6 @@ describe("Posts API", () => {
     it ('should create comment for post, POST /hometask_06/api/posts/{postId}/comments', async () => {
         const token = await loginGetToken();
         const post = await createPost(app);
-        console.log("POST ID from TEST",post.id);
 
         const response = await request(app)
             .post(`${POSTS_PATH}/${post.id}/comments`)
@@ -146,7 +145,25 @@ describe("Posts API", () => {
             .send({content: "stringstringstringst"})
             .expect(HttpStatus.Created);
 
-        console.log(response);
-        console.log(response.body);
+        expect(response.body).toHaveProperty('id');
+        expect(response.body).toHaveProperty('content');
+        expect(response.body).toHaveProperty('commentatorInfo');
+        expect(response.body).toHaveProperty('createdAt');
+
+        expect(response.body.commentatorInfo).toHaveProperty('userId');
+        expect(response.body.commentatorInfo).toHaveProperty('userLogin');
+
+        expect(response.body.content).toBe("stringstringstringst");
+
+        expect(typeof response.body.id).toBe('string');
+        expect(typeof response.body.createdAt).toBe('string');
+        expect(typeof response.body.commentatorInfo.userId).toBe('string');
+        expect(typeof response.body.commentatorInfo.userLogin).toBe('string');
+        expect(new Date(response.body.createdAt).toISOString()).toBe(response.body.createdAt);
+
+        expect(response.body.id).not.toBe('');
+        expect(response.body.content).not.toBe('');
+        expect(response.body.commentatorInfo.userId).not.toBe('');
+        expect(response.body.commentatorInfo.userLogin).not.toBe('');
     })
 })
