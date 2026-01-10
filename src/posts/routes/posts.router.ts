@@ -16,6 +16,7 @@ import {PostSortField} from "./input/post-sort-field";
 import {AccessTokenGuard} from "../../auth/middlewares/access.token.guard";
 import { commentInputValidation} from "../../comments/routes/comment.input-dto.validation-middleware";
 import {createCommentHandler} from "../../comments/routes/handlers/create-comment.handler";
+import {getCommentListHandler} from "../../comments/routes/handlers/get-comment-list.handler";
 
 export const postsRouter: Router = Router({});
 
@@ -56,4 +57,10 @@ postsRouter
         commentInputValidation,
         inputValidationResultMiddleware,
         createCommentHandler
+    )
+    .get(
+        "/:postId/comments",
+        idValidator,
+        inputValidationResultMiddleware,
+        getCommentListHandler
     )

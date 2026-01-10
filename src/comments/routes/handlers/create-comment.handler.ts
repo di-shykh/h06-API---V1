@@ -9,13 +9,15 @@ import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpEx
 import {HttpStatus} from "../../../core/types/http-statuses";
 
 export async function createCommentHandler(
-    req: Request<{postId: string},{},CommentInputDto>,
+    req: Request<{id: string},{},CommentInputDto>,
     res: Response): Promise<void> {
     try{
-        const postId: string = req.params.postId;
+        const postId: string = req.params.id;
         const commentInput: CommentInputDto = req.body;
         const userId: string = req.userId as string;
+
         const result: Result<CommentOutput|null> = await commentsService.createComment(postId, userId, commentInput);
+
         if(result.status!== ResultStatus.Created){
              res.status(resultCodeToHttpException(result.status)).json({
                 errorsMessages: result.extensions

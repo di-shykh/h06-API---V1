@@ -14,6 +14,8 @@ import {getPostById} from "../../utils/posts/get-post-by-id";
 import {SETTINGS} from "../../../src/core/settings/settings";
 import {getPostDto} from "../../utils/posts/get-post-dto";
 import {updatePost} from "../../utils/posts/update-post";
+import {loginGetToken} from "../../utils/login-get-token";
+import {CommentInputDto} from "../../../src/comments/application/dtos/comment.input-dto";
 
 describe("Posts API", () => {
     const app = express();
@@ -132,5 +134,19 @@ describe("Posts API", () => {
         for (let i = 0; i < dates.length - 1; i++) {
             expect(dates[i] >= dates[i + 1]).toBe(true);
         }
+    })
+    it ('should create comment for post, POST /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken();
+        const post = await createPost(app);
+        console.log("POST ID from TEST",post.id);
+
+        const response = await request(app)
+            .post(`${POSTS_PATH}/${post.id}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({content: "stringstringstringst"})
+            .expect(HttpStatus.Created);
+
+        console.log(response);
+        console.log(response.body);
     })
 })
