@@ -16,6 +16,8 @@ import {getPostDto} from "../../utils/posts/get-post-dto";
 import {updatePost} from "../../utils/posts/update-post";
 import {loginGetToken} from "../../utils/login-get-token";
 import {CommentInputDto} from "../../../src/comments/application/dtos/comment.input-dto";
+import {ObjectId} from "mongodb";
+import {createComment} from "../../utils/comments/create-comment";
 
 describe("Posts API", () => {
     const app = express();
@@ -106,7 +108,7 @@ describe("Posts API", () => {
             ...getPostDto(newBlog.id),
             title: 'New post title Di',
         });
-        for(let i=0; i<20; i++) {
+        for(let i=0; i<15; i++) {
             await createPost(app, {
                 ...getPostDto(newBlog.id),
                 title: `New post title ${i}`,
@@ -125,8 +127,8 @@ describe("Posts API", () => {
 
         expect(response.body).toHaveProperty('page', 1);
         expect(response.body).toHaveProperty('pageSize', 10);
-        expect(response.body).toHaveProperty('pagesCount',3);
-        expect(response.body).toHaveProperty('totalCount', 21);
+        expect(response.body).toHaveProperty('pagesCount',2);
+        expect(response.body).toHaveProperty('totalCount', 16);
         expect(response.body.items).toHaveLength( 10);
 
         // Проверяем сортировку по убыванию даты
@@ -136,7 +138,7 @@ describe("Posts API", () => {
         }
     })
     it ('should create comment for post, POST /hometask_06/api/posts/{postId}/comments', async () => {
-        const token = await loginGetToken();
+        const token = await loginGetToken(app);
         const post = await createPost(app);
 
         const response = await request(app)
@@ -166,4 +168,34 @@ describe("Posts API", () => {
         expect(response.body.commentatorInfo.userId).not.toBe('');
         expect(response.body.commentatorInfo.userLogin).not.toBe('');
     })
+    it('should return 401 if unauthorized, POST /hometask_06/api/posts/{postId}/comments', async () => {
+        const post = await createPost(app);
+
+        await request(app)
+            .post(`${POSTS_PATH}/${post.id}/comments`)
+            .send({ content: "test content" })
+            .expect(HttpStatus.Unauthorized);
+    });
+
+    it('should return 400 if content is too short, POST /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken(app);
+        const post = await createPost(app);
+
+        await request(app)
+            .post(`${POSTS_PATH}/${post.id}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ content: "short" }) // если есть ограничение по длине
+            .expect(HttpStatus.BadRequest);
+    });
+
+    it('should return 404 if post not found, POST /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken(app);
+        const nonExistentPostId = new ObjectId().toString();
+
+        await request(app)
+            .post(`${POSTS_PATH}/${nonExistentPostId}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ content: "test content for e2e tests" })
+            .expect(HttpStatus.NotFound);
+    });
 })

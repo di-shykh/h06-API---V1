@@ -7,12 +7,16 @@ import {Result} from "../../../core/result/resul.type";
 import {ResultStatus} from "../../../core/result/result.code";
 import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
 import {HttpStatus} from "../../../core/types/http-statuses";
+import {postsQueryRepository} from "../../../posts/repositories/posts.query-repository";
+import {WithId} from "mongodb";
+import {Post} from "../../../posts/domain/post";
 
 export async function createCommentHandler(
     req: Request<{id: string},{},CommentInputDto>,
     res: Response): Promise<void> {
     try{
         const postId: string = req.params.id;
+        const post: WithId<Post> = await postsQueryRepository.findPostByIdOrFail(postId);
         const commentInput: CommentInputDto = req.body;
         const userId: string = req.userId as string;
 

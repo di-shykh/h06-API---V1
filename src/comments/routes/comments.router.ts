@@ -20,7 +20,7 @@ commentsRouter
         deleteCommentHandler
     )
     .put (
-        "/:di",
+        "/:id",
         AccessTokenGuard,
         idValidator,
         commentInputValidation,

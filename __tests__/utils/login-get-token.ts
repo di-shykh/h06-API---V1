@@ -6,10 +6,8 @@ import {HttpStatus} from "../../src/core/types/http-statuses";
 import express, {Express} from "express";
 import {setupApp} from "../../src/setup-app";
 
-export const loginGetToken = async () => {
+export const loginGetToken = async (app: Express) => {
     // Создаем пользователя
-    const app: Express = express();
-    setupApp(app);
     const user = await createUser(app, {
         ...getUserDto(),
         login: 'TestUser',
