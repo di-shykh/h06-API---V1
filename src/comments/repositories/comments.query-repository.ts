@@ -15,13 +15,13 @@ export const commentsQueryRepository = {
         }
         return result;
     },
-    async findManyComments(queryDto: CommentQueryInput): Promise<{items: WithId<CommentDB>[], totalCount: number}> {
+    async findManyComments(queryDto: CommentQueryInput, postId: string): Promise<{items: WithId<CommentDB>[], totalCount: number}> {
         const {
             pageNumber,
             pageSize,
             sortBy,
             sortDirection,
-            postId,
+            // postId,
             userId,
             userLogin,
             createdAt,
@@ -76,10 +76,20 @@ export const commentsQueryRepository = {
         pageSize: number,
         totalCount: number
     ): Promise<CommentListPaginatedOutput> {
+        if (comments.length === 0) {
+            return {
+                pagesCount: 0,
+                page: pageNumber,
+                pageSize: pageSize,
+                totalCount: 0,
+                items: []
+            };
+        }
+
         const userIds = comments.map(comment => comment.userId);
         const users = await userCollection.find({
             _id: { $in: userIds.map(id => new ObjectId(id)) }
-        });
+        }).toArray();
         const userMap = new Map<string, UserDB>();
         users.forEach(user => {
             userMap.set(user._id.toString(), user);

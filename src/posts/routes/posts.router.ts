@@ -59,8 +59,9 @@ postsRouter
         createCommentHandler
     )
     .get(
-        "/:postId/comments",
+        "/:id/comments",
         idValidator,
+        paginationAndSortingValidation(PostSortField),
         inputValidationResultMiddleware,
         getCommentListHandler
     )
