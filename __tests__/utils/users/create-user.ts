@@ -8,14 +8,15 @@ import {generateBasicAuthToken} from "../generate-admin-auth-token";
 import {HttpStatus} from "../../../src/core/types/http-statuses";
 
 export async function createUser(app: Express, userDto: UserInputDto): Promise<UserOutput> {
-    const testUserData = {
-        ...getUserDto(),
-        ...userDto,
-    }
+    // const testUserData = {
+    //     ...getUserDto(),
+    //     ...userDto,
+    // }
     const createUserResponse = await request(app)
         .post(USERS_PATH)
         .set('Authorization', generateBasicAuthToken())
-        .send(testUserData)
+        // .send(testUserData)
+        .send(userDto)
         .expect(HttpStatus.Created);
     return createUserResponse.body;
 }

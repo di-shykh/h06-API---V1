@@ -26,6 +26,9 @@ describe("Posts API", () => {
 
     beforeAll(async () => {
         await runDB(SETTINGS.MONGO_URL_TEST);
+        // await clearDb(app);
+    });
+    beforeEach(async () => {
         await clearDb(app);
     });
     afterAll(async () => {
@@ -198,4 +201,63 @@ describe("Posts API", () => {
             .send({ content: "test content for e2e tests" })
             .expect(HttpStatus.NotFound);
     });
+    it('should return comments for post GET /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken(app);
+        const post = await createPost(app);
+
+        for (let i=0; i<11; i++){
+           await createComment(app, token, post.id, { content:`content for test comment ${i}_${Date.now().toString()}`})
+        }
+         const result = await request(app)
+             .get(`${POSTS_PATH}/${post.id}/comments`)
+             .expect(HttpStatus.Ok);
+
+        expect(result.body).toHaveProperty('page', 1);
+        expect(result.body).toHaveProperty('pageSize', 10);
+        expect(result.body).toHaveProperty('pagesCount',2);
+        expect(result.body).toHaveProperty('totalCount', 11);
+        expect(result.body.items).toHaveLength(10);
+
+        expect(result.body.items[0]).toHaveProperty('id');
+        expect(result.body.items[0]).toHaveProperty('content');
+        expect(result.body.items[0]).toHaveProperty('commentatorInfo');
+        expect(result.body.items[0].commentatorInfo).toHaveProperty('userId');
+        expect(result.body.items[0].commentatorInfo).toHaveProperty('userLogin');
+        expect(result.body.items[0]).toHaveProperty('createdAt');
+
+    })
+    it('should not return comments for post with wrong id, return 404: GET /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken(app);
+        const post = await createPost(app);
+        const notExistPostId = new ObjectId().toString();
+
+        for (let i=0; i<11; i++){
+            await createComment(app, token, post.id, { content:`content for test comment ${i}_${Date.now().toString()}`})
+        }
+        const result = await request(app)
+            .get(`${POSTS_PATH}/${notExistPostId}/comments`)
+            .expect(HttpStatus.NotFound);
+    })
+    it('should return 400 for invalid post id format: GET /hometask_06/api/posts/{postId}/comments', async () => {
+        const invalidPostId = 'invalid-id-format';
+
+        const result = await request(app)
+            .get(`${POSTS_PATH}/${invalidPostId}/comments`)
+            .expect(HttpStatus.BadRequest);
+    });
+
+    it('should return empty comments list for post without comments: GET /hometask_06/api/posts/{postId}/comments', async () => {
+        const token = await loginGetToken(app);
+        const post = await createPost(app);
+
+        const result = await request(app)
+            .get(`${POSTS_PATH}/${post.id}/comments`)
+            .expect(HttpStatus.Ok);
+
+        expect(result.body).toHaveProperty('items');
+        expect(result.body.items).toHaveLength(0);
+        expect(result.body.totalCount).toBe(0);
+        expect(result.body.pagesCount).toBe(0);
+    });
+
 })

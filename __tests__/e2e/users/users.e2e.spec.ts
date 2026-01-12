@@ -17,6 +17,9 @@ describe( "Users API", ()=>{
     const adminToken: string = generateBasicAuthToken();
     beforeAll(async () => {
         await runDB(SETTINGS.MONGO_URL_TEST);
+        //await clearDb(app);
+    });
+    beforeEach(async () => {
         await clearDb(app);
     });
     afterAll(async () => {

@@ -23,6 +23,9 @@ describe("Blogs API", () => {
     const adminToken: string = generateBasicAuthToken();
     beforeAll(async () => {
         await runDB(SETTINGS.MONGO_URL_TEST)
+        //await clearDb(app);
+    });
+    beforeEach(async () => {
         await clearDb(app);
     });
     afterAll(async () => {
@@ -130,6 +133,7 @@ describe("Blogs API", () => {
         expect(posts.items).toBeInstanceOf(Array);
     })
     it('should return blogs list with pagination, sorting: GET /hometask_04/api/blogs/', async () => {
+        await clearDb(app);
         await createBlog(app, {
             ...getBlogDto(),
             name: "Blog name Di",
@@ -172,6 +176,7 @@ describe("Blogs API", () => {
         }
     })
     it('should return blogs list with pagination, sorting and search by name: GET /hometask_04/api/blogs/', async () => {
+
         await createBlog(app, {
             ...getBlogDto(),
             name: "Blog name Di",
