@@ -1,7 +1,7 @@
-import {LoginInputDto} from "../application/dtos/loginInputDto";
+import {LoginInputDto} from "../../application/dtos/loginInputDto";
 import {Request, Response} from "express";
-import {HttpStatus} from "../../core/types/http-statuses";
-import {authService} from "../application/auth.service";
+import {HttpStatus} from "../../../core/types/http-statuses";
+import {authService} from "../../application/auth.service";
 
 export async function authHandler(req: Request <{}, {}, LoginInputDto>, res: Response) {
 

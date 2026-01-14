@@ -1,9 +1,14 @@
 import {Router} from "express";
-import {loginOrEmailValidation, passwordValidation} from "../../users/routes/user.input-dto.validation-middleware";
+import {
+    loginOrEmailValidation,
+    passwordValidation,
+    userCreateValidation
+} from "../../users/routes/user.input-dto.validation-middleware";
 import {inputValidationResultMiddleware} from "../../core/middlewares/validation/input-validation.result.middleware";
-import {authHandler} from "./auth.handler";
+import {authHandler} from "./handlers/auth.handler";
 import {AccessTokenGuard} from "../middlewares/access.token.guard";
-import {authGetHandler} from "./auth.get-user.handler";
+import {authGetHandler} from "./handlers/auth.get-user.handler";
+import {registrationHandler} from "./handlers/registration.handler";
 
 export const authRouter: Router = Router({});
 
@@ -20,3 +25,7 @@ authRouter
         AccessTokenGuard,
         authGetHandler
     )
+    .post("registration",
+        userCreateValidation,
+        inputValidationResultMiddleware,
+        registrationHandler);

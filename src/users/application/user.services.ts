@@ -16,7 +16,8 @@ export const usersService = {
         if (!isEmailUnique) {
             throw new DuplicateFieldError("email");
         }
-        const passwordHash = await bcryptService.generateHash(password);
+        const passwordHash: string = await bcryptService.generateHash(password);
+
         const newUser: UserDB = {
             login,
             email,

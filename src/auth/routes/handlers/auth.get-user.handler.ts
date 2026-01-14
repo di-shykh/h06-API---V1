@@ -1,10 +1,10 @@
 import {Request, Response} from 'express';
-import {usersQueryRepository} from "../../users/repositories/user.query-repository";
-import {errorHandler} from "../../core/errors/error.handler";
-import {UserOutput} from "../../users/routes/output/user-output";
+import {usersQueryRepository} from "../../../users/repositories/user.query-repository";
+import {errorHandler} from "../../../core/errors/error.handler";
+import {UserOutput} from "../../../users/routes/output/user-output";
 import {WithId} from "mongodb";
-import {User} from "../../users/domain/user";
-import {HttpStatus} from "../../core/types/http-statuses";
+import {User} from "../../../users/domain/user";
+import {HttpStatus} from "../../../core/types/http-statuses";
 
 export async function authGetHandler(req: Request, res: Response) {
     try {
