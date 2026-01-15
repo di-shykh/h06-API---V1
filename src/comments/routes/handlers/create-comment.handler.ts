@@ -3,7 +3,7 @@ import {Request, Response} from 'express';
 import {errorHandler} from "../../../core/errors/error.handler";
 import {commentsService} from "../../application/comment.services";
 import {CommentOutput} from "../output/comment-output";
-import {Result} from "../../../core/result/resul.type";
+import {Result} from "../../../core/result/result.type";
 import {ResultStatus} from "../../../core/result/result.code";
 import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
 import {HttpStatus} from "../../../core/types/http-statuses";

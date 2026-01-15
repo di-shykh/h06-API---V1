@@ -1,7 +1,7 @@
 import {errorHandler} from "../../../core/errors/error.handler";
 import {Request, Response} from "express";
 import {commentsQueryRepository} from "../../repositories/comments.query-repository";
-import {ResultObject} from "../../../core/result/resul.type";
+import {ResultObject} from "../../../core/result/result.type";
 import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
 import {HttpStatus} from "../../../core/types/http-statuses";
 

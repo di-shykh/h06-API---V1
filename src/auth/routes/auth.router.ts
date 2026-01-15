@@ -25,7 +25,13 @@ authRouter
         AccessTokenGuard,
         authGetHandler
     )
-    .post("registration",
+    .post(
+        "registration",
         userCreateValidation,
         inputValidationResultMiddleware,
-        registrationHandler);
+        registrationHandler)
+    .post(
+        "/registration-confirmation",
+        inputValidationResultMiddleware,
+        registrationConfirmationHandler
+    )

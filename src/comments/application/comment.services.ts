@@ -1,7 +1,7 @@
 import {CommentInputDto} from "./dtos/comment.input-dto";
 import {postsQueryRepository} from "../../posts/repositories/posts.query-repository";
 import {ResultStatus} from "../../core/result/result.code";
-import {Result, ResultObject} from "../../core/result/resul.type";
+import {Result, ResultObject} from "../../core/result/result.type";
 import {CommentDB} from "../routes/output/commnent.db";
 import {commentsRepository} from "../repositories/comments.repository";
 import {commentsQueryRepository} from "../repositories/comments.query-repository";

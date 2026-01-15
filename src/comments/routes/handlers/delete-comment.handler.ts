@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {commentsService} from "../../application/comment.services";
-import {Result} from "../../../core/result/resul.type";
+import {Result} from "../../../core/result/result.type";
 import {ResultStatus} from "../../../core/result/result.code";
 import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
 import {errorHandler} from "../../../core/errors/error.handler";

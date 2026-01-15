@@ -9,6 +9,7 @@ import {usersQueryRepository} from "../../users/repositories/user.query-reposito
 import {DuplicateFieldError} from "../../core/errors/duplicateField.error";
 import {UserCreateInput} from "../../users/routes/input/create-user.input";
 import {emailAdapter} from "../adapters/email.adapter";
+import {Result, ResultObject} from "../../core/result/result.type";
 
 export const authService = {
     async loginUser(loginOrEmail: string, password: string): Promise<{accessToken: string}|null> {
@@ -19,16 +20,18 @@ export const authService = {
         const accessToken= await jwtService.createToken(user._id.toString());
         return {accessToken};
     },
-    async createUser(userInputDto: UserCreateInput): Promise<string|null> {
+    async createUser(userInputDto: UserCreateInput): Promise<Result<string>> {
 
         const {login, email, password} = userInputDto;
         const isLoginUnique = await usersQueryRepository.isLoginUnique(login);
         if (!isLoginUnique) {
-            throw new DuplicateFieldError("login");
+           // throw new DuplicateFieldError("login");
+            ResultObject.BadRequest('login', 'Login already exists');
         }
         const isEmailUnique = await usersQueryRepository.isEmailUnique(email);
         if (!isEmailUnique) {
-            throw new DuplicateFieldError("email");
+            //throw new DuplicateFieldError("email");
+            ResultObject.BadRequest('email', 'Email already exists');
         }
         const passwordHash: string = await bcryptService.generateHash(password);
         const confirmationCode: string = uuidv4();
@@ -47,10 +50,10 @@ export const authService = {
         const newUserId = await usersRepository.createUser(newUser);
         try{
             await emailAdapter.sendConfirmationEmail(email, confirmationCode);
-            return newUserId;
+            return ResultObject.Success(newUserId);
         } catch(err){
                await usersRepository.deleteUser(newUserId);
-               return null;
+               return ResultObject.BadRequest('email', 'Email wasn\'t confirmed');
             }
     }
 }

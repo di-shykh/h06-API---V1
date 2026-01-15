@@ -5,7 +5,7 @@ import {matchedData} from "express-validator";
 import {setDefaultSortAndPaginationIfNotExist} from "../../../core/helpers/set-default-sort-and-pagination";
 import {commentsQueryRepository} from "../../repositories/comments.query-repository";
 import {CommentListPaginatedOutput} from "../output/comment-list-paginated.output";
-import {ResultObject} from "../../../core/result/resul.type";
+import {ResultObject} from "../../../core/result/result.type";
 import {resultCodeToHttpException} from "../../../core/result/resultCodeToHttpExeptions";
 import {HttpStatus} from "../../../core/types/http-statuses";
 import {postsQueryRepository} from "../../../posts/repositories/posts.query-repository";
