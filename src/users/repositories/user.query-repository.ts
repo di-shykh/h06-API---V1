@@ -87,5 +87,9 @@ export const usersQueryRepository = {
                 }),
             ),
         }
+    },
+    async findByConfirmationCode(code: string): Promise<WithId<UserDB>| null> {
+        const user: WithId<UserDB>|null = await userCollection.findOne({"emailConfirmation.confirmationCode": code});
+        return user;
     }
 }

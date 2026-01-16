@@ -20,4 +20,16 @@ export const usersRepository = {
             $or: [{login: loginOrEmail }, { email: loginOrEmail }],
         });
     },
+    async confirmEmail(code: string): Promise<boolean|null> {
+        try {
+            const result = await userCollection.updateOne(
+                {"emailConfirmation.confirmationCode" : code},
+                { $set: {"emailConfirmation.isConfirmed" : true}}
+            );
+            return result.modifiedCount === 1;
+        } catch (error) {
+            console.error("Error confirming email:", error);
+            return false;
+        }
+    }
 }

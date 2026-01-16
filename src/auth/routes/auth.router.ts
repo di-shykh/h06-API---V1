@@ -9,6 +9,8 @@ import {authHandler} from "./handlers/auth.handler";
 import {AccessTokenGuard} from "../middlewares/access.token.guard";
 import {authGetHandler} from "./handlers/auth.get-user.handler";
 import {registrationHandler} from "./handlers/registration.handler";
+import {registrationConfirmationHandler} from "./handlers/registration-confimation.handler";
+import {codeConfirmationValidation} from "../middlewares/validation/registration.input-validation";
 
 export const authRouter: Router = Router({});
 
@@ -32,6 +34,7 @@ authRouter
         registrationHandler)
     .post(
         "/registration-confirmation",
+        codeConfirmationValidation,
         inputValidationResultMiddleware,
         registrationConfirmationHandler
     )

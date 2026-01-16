@@ -6,7 +6,6 @@ import {UserDB} from "../../users/routes/output/user.db";
 import { v4 as uuidv4, v1 as uuidv1, v3 as uuidv3, v5 as uuidv5 } from 'uuid';
 import { addHours, addDays, isAfter } from 'date-fns';
 import {usersQueryRepository} from "../../users/repositories/user.query-repository";
-import {DuplicateFieldError} from "../../core/errors/duplicateField.error";
 import {UserCreateInput} from "../../users/routes/input/create-user.input";
 import {emailAdapter} from "../adapters/email.adapter";
 import {Result, ResultObject} from "../../core/result/result.type";
@@ -20,7 +19,7 @@ export const authService = {
         const accessToken= await jwtService.createToken(user._id.toString());
         return {accessToken};
     },
-    async createUser(userInputDto: UserCreateInput): Promise<Result<string>> {
+    async createUser(userInputDto: UserCreateInput): Promise<Result<string|null>> {
 
         const {login, email, password} = userInputDto;
         const isLoginUnique = await usersQueryRepository.isLoginUnique(login);
@@ -55,5 +54,24 @@ export const authService = {
                await usersRepository.deleteUser(newUserId);
                return ResultObject.BadRequest('email', 'Email wasn\'t confirmed');
             }
+    },
+    async confirmUserRegistration(code: string): Promise<Result<boolean|null>> {
+        const user: WithId<UserDB>|null = await usersQueryRepository.findByConfirmationCode(code);
+        if(!user||!user.emailConfirmation) {
+            return ResultObject.BadRequest('code', 'Code does not exist');
+        }
+        if(user.emailConfirmation.isConfirmed) {
+            return ResultObject.BadRequest('code', 'Registration is already confirmed');
+        }
+        const dateNow = new Date();
+        const expirationDate = new Date(user.emailConfirmation.expirationDate);
+        if(isAfter(dateNow,expirationDate)){
+            return ResultObject.BadRequest('code', 'Code expired');
+        }
+        const result = await usersRepository.confirmEmail(code);
+        if(!result){
+            return ResultObject.BadRequest('email', 'Email wasn\'t confirmed');
+        }
+        return ResultObject.Success(result);
     }
 }
