@@ -11,8 +11,12 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "CommonJS",
+    "moduleResolution": "node",
     "target": "es2016",
      "types": ["node", "jest"],
+//    "module": "NodeNext",
+//    "moduleResolution": "NodeNext",
+//    "target": "ES2022",
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

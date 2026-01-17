@@ -15,11 +15,7 @@ export const usersRepository = {
         }
         return;
     },
-    async findByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDB>|null> {
-        return await userCollection.findOne({
-            $or: [{login: loginOrEmail }, { email: loginOrEmail }],
-        });
-    },
+
     async confirmEmail(code: string): Promise<boolean|null> {
         try {
             const result = await userCollection.updateOne(
@@ -29,6 +25,23 @@ export const usersRepository = {
             return result.modifiedCount === 1;
         } catch (error) {
             console.error("Error confirming email:", error);
+            return false;
+        }
+    },
+    async updateUserEmailConfirmation(_id: ObjectId, confirmationCode: string, expirationDate: string): Promise<boolean|null> {
+        try {
+            const result = await userCollection.updateOne(
+                {_id: _id},
+                {
+                    $set: {
+                        "emailConfirmation.confirmationCode": confirmationCode,
+                        "emailConfirmation.expirationDate": expirationDate
+                    }
+                }
+            );
+            return result.modifiedCount === 1;
+        } catch (error) {
+            console.error("Error updating email confirmation:", error);
             return false;
         }
     }

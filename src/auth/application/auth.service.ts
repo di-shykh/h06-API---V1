@@ -3,16 +3,31 @@ import {bcryptService} from "../adapters/bcrypt.service";
 import {jwtService} from "./jwt.service";
 import {WithId} from "mongodb";
 import {UserDB} from "../../users/routes/output/user.db";
-import { v4 as uuidv4, v1 as uuidv1, v3 as uuidv3, v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { addHours, addDays, isAfter } from 'date-fns';
 import {usersQueryRepository} from "../../users/repositories/user.query-repository";
 import {UserCreateInput} from "../../users/routes/input/create-user.input";
 import {emailAdapter} from "../adapters/email.adapter";
 import {Result, ResultObject} from "../../core/result/result.type";
 
+
+function normalizeEmail(email: string): string {
+    let normalized = email.toLowerCase().trim();
+    const atIndex = normalized.indexOf('@');
+    if (atIndex > 0) {
+        const localPart = normalized.substring(0, atIndex);
+        const domain = normalized.substring(atIndex);
+        const plusIndex = localPart.indexOf('+');
+        if (plusIndex > 0) {
+            normalized = localPart.substring(0, plusIndex) + domain;
+        }
+    }
+    return normalized;
+}
+
 export const authService = {
     async loginUser(loginOrEmail: string, password: string): Promise<{accessToken: string}|null> {
-        const user: WithId<UserDB>|null = await usersRepository.findByLoginOrEmail(loginOrEmail);
+        const user: WithId<UserDB>|null = await usersQueryRepository.findByLoginOrEmail(loginOrEmail);
         if (!user) return null;
         const result = await bcryptService.checkPassword(password, user.passwordHash);
         if (!result) return null;
@@ -22,22 +37,25 @@ export const authService = {
     async createUser(userInputDto: UserCreateInput): Promise<Result<string|null>> {
 
         const {login, email, password} = userInputDto;
+        const normalizedEmail = normalizeEmail(email);
         const isLoginUnique = await usersQueryRepository.isLoginUnique(login);
         if (!isLoginUnique) {
            // throw new DuplicateFieldError("login");
-            ResultObject.BadRequest('login', 'Login already exists');
+          return   ResultObject.BadRequest('login', 'Login already exists');
         }
-        const isEmailUnique = await usersQueryRepository.isEmailUnique(email);
+        //const isEmailUnique = await usersQueryRepository.isEmailUnique(email);
+        const isEmailUnique = await usersQueryRepository.isEmailUnique(normalizedEmail);
         if (!isEmailUnique) {
             //throw new DuplicateFieldError("email");
-            ResultObject.BadRequest('email', 'Email already exists');
+           return  ResultObject.BadRequest('email', 'Email already exists');
         }
         const passwordHash: string = await bcryptService.generateHash(password);
         const confirmationCode: string = uuidv4();
         const expirationDate: string = addHours(new Date(), 24).toISOString();
+        //const normalizedEmail = email.toLowerCase().trim();
         const newUser: UserDB = {
             login,
-            email,
+            email: normalizedEmail,
             passwordHash,
             createdAt: new Date().toISOString(),
             emailConfirmation: {
@@ -73,5 +91,24 @@ export const authService = {
             return ResultObject.BadRequest('email', 'Email wasn\'t confirmed');
         }
         return ResultObject.Success(result);
+    },
+    async resendEmail(email: string): Promise<Result<boolean|null>> {
+        const user: WithId<UserDB>|null = await usersQueryRepository.findUserByEmail(email);
+        if(!user||!user.emailConfirmation) {
+            return ResultObject.BadRequest('email', 'User with this email is not exists');
+        }
+        if(user.emailConfirmation?.isConfirmed){
+            return ResultObject.BadRequest('email', 'Email is already confirmed');
+        }
+        const confirmationCode: string = uuidv4();
+        const expirationDate: string = addHours(new Date(), 24).toISOString();
+
+        try{
+            await emailAdapter.resendEmail(email,confirmationCode);
+           const result = await usersRepository.updateUserEmailConfirmation(user._id, confirmationCode, expirationDate);
+            return ResultObject.Success(result);
+        } catch (e) {
+            return ResultObject.BadRequest('email', 'Email wasn\'t confirmed');
+        }
     }
 }

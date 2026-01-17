@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {
+    emailValidation,
     loginOrEmailValidation,
     passwordValidation,
     userCreateValidation
@@ -11,6 +12,7 @@ import {authGetHandler} from "./handlers/auth.get-user.handler";
 import {registrationHandler} from "./handlers/registration.handler";
 import {registrationConfirmationHandler} from "./handlers/registration-confimation.handler";
 import {codeConfirmationValidation} from "../middlewares/validation/registration.input-validation";
+import {registrationEmailResendingHandler} from "./handlers/registration-email-resending.handler";
 
 export const authRouter: Router = Router({});
 
@@ -28,7 +30,7 @@ authRouter
         authGetHandler
     )
     .post(
-        "registration",
+        "/registration",
         userCreateValidation,
         inputValidationResultMiddleware,
         registrationHandler)
@@ -37,4 +39,10 @@ authRouter
         codeConfirmationValidation,
         inputValidationResultMiddleware,
         registrationConfirmationHandler
+    )
+    .post(
+        "/registration-email-resending",
+        emailValidation,
+        inputValidationResultMiddleware,
+        registrationEmailResendingHandler
     )

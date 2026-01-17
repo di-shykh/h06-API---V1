@@ -8,6 +8,20 @@ import {UserListPaginatedOutput} from "../routes/output/user-list-paginted.outpu
 import {PostOutput} from "../../posts/routes/output/post-output";
 import {UserDB} from "../routes/output/user.db";
 
+function normalizeEmail(email: string): string {
+    let normalized = email.toLowerCase().trim();
+    const atIndex = normalized.indexOf('@');
+    if (atIndex > 0) {
+        const localPart = normalized.substring(0, atIndex);
+        const domain = normalized.substring(atIndex);
+        const plusIndex = localPart.indexOf('+');
+        if (plusIndex > 0) {
+            normalized = localPart.substring(0, plusIndex) + domain;
+        }
+    }
+    return normalized;
+}
+
 export const usersQueryRepository = {
     async findUserByIdOrFail(id: string): Promise<WithId<User>> {
         const user = await userCollection.findOne({_id: new ObjectId(id)});
@@ -17,8 +31,8 @@ export const usersQueryRepository = {
         return user;
     },
     async isEmailUnique(email: string): Promise<Boolean> {
-        const emailNomilized = email.toLowerCase().trim();
-        const user = await userCollection.findOne({email: emailNomilized});
+        const normalizedEmail = normalizeEmail(email);
+        const user = await userCollection.findOne({email: normalizedEmail});
         return !user;
     },
     async isLoginUnique(login: string): Promise<Boolean> {
@@ -91,5 +105,16 @@ export const usersQueryRepository = {
     async findByConfirmationCode(code: string): Promise<WithId<UserDB>| null> {
         const user: WithId<UserDB>|null = await userCollection.findOne({"emailConfirmation.confirmationCode": code});
         return user;
-    }
+    },
+    async findUserByEmail(email: string): Promise<WithId<UserDB>| null> {
+        const normalizedEmail = normalizeEmail(email);
+        const user: WithId<UserDB>|null = await userCollection.findOne({"email":normalizedEmail})
+        return user;
+    },
+    async findByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDB>|null> {
+        const normalizedEmail = normalizeEmail(loginOrEmail);
+        return await userCollection.findOne({
+            $or: [{login: loginOrEmail }, { email: normalizedEmail }],
+        });
+    },
 }
