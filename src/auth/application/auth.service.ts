@@ -9,21 +9,7 @@ import {usersQueryRepository} from "../../users/repositories/user.query-reposito
 import {UserCreateInput} from "../../users/routes/input/create-user.input";
 import {emailAdapter} from "../adapters/email.adapter";
 import {Result, ResultObject} from "../../core/result/result.type";
-
-
-function normalizeEmail(email: string): string {
-    let normalized = email.toLowerCase().trim();
-    const atIndex = normalized.indexOf('@');
-    if (atIndex > 0) {
-        const localPart = normalized.substring(0, atIndex);
-        const domain = normalized.substring(atIndex);
-        const plusIndex = localPart.indexOf('+');
-        if (plusIndex > 0) {
-            normalized = localPart.substring(0, plusIndex) + domain;
-        }
-    }
-    return normalized;
-}
+import {normalizeEmail} from "../../core/helpers/normolize-email";
 
 export const authService = {
     async loginUser(loginOrEmail: string, password: string): Promise<{accessToken: string}|null> {
@@ -74,6 +60,9 @@ export const authService = {
             }
     },
     async confirmUserRegistration(code: string): Promise<Result<boolean|null>> {
+        if (!code || code.length !== 36) { // UUID v4 имеет 36 символов
+            return ResultObject.BadRequest('code', 'Invalid confirmation code format');
+        }
         const user: WithId<UserDB>|null = await usersQueryRepository.findByConfirmationCode(code);
         if(!user||!user.emailConfirmation) {
             return ResultObject.BadRequest('code', 'Code does not exist');

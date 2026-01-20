@@ -20,7 +20,11 @@ export const usersRepository = {
         try {
             const result = await userCollection.updateOne(
                 {"emailConfirmation.confirmationCode" : code},
-                { $set: {"emailConfirmation.isConfirmed" : true}}
+                { $set: {
+                        "emailConfirmation.isConfirmed" : true,
+                        "emailConfirmation.confirmationCode": null
+                    }
+                }
             );
             return result.modifiedCount === 1;
         } catch (error) {

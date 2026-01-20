@@ -1,3 +1,9 @@
+import rateLimit from 'express-rate-limit';
+jest.mock('express-rate-limit', () => ({
+    __esModule: true,
+    default: jest.fn(() => (req: any, res: any, next: any) => next())
+}));
+
 import express, {Express} from "express";
 import {setupApp} from "../../../src/setup-app";
 import {generateBasicAuthToken} from "../../utils/generate-admin-auth-token";
@@ -10,11 +16,13 @@ import {HttpStatus} from "../../../src/core/types/http-statuses";
 import {beforeEach} from "node:test";
 import {v4 as uuidv4} from "uuid";
 
+process.env.NODE_ENV = 'test';
 describe("Check Auth: POST /auth/login", () => {
     const app: Express = express();
     setupApp(app);
     const adminToken: string = generateBasicAuthToken();
     beforeAll(async () => {
+        // process.env.DISABLE_RATE_LIMIT = 'true';
         await runDB(SETTINGS.MONGO_URL_TEST);
         await clearDb(app);
     });
@@ -22,6 +30,7 @@ describe("Check Auth: POST /auth/login", () => {
         await clearDb(app);
     })
     afterAll(async () => {
+        // delete process.env.DISABLE_RATE_LIMIT;
         stopDb();
     });
     it('should register user and send registration code to email: POST /hometask_07/api/auth/registration', async () => {
